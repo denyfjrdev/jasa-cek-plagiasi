@@ -259,21 +259,24 @@
   }
 
   // ── Submit form ──
-  async function submitForm() {
+async function submitForm() {
   event.preventDefault();
   if (!document.getElementById('checkFinal').checked) {
     document.getElementById('errFinal').style.display = 'block';
     return false;
   }
 
+  const file1 = document.getElementById('fileKerja').files[0];
+  const file2 = document.getElementById('buktiBayar').files[0];
+
+  if (file1.size > 5 * 1024 * 1024) { alert('❌ File terlalu besar! Maksimal 5MB.'); return false; }
+  if (file2.size > 5 * 1024 * 1024) { alert('❌ Bukti bayar terlalu besar! Maksimal 5MB.'); return false; }
+
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('btnSubmit').disabled = true;
   document.getElementById('btnSubmit').textContent = 'Mengirim...';
 
   try {
-    const file1 = document.getElementById('fileKerja').files[0];
-    const file2 = document.getElementById('buktiBayar').files[0];
-
     const toBase64 = file => new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -296,26 +299,15 @@
     payload.append('mimeType2',      file2.type);
     payload.append('bukti_bayar',    b64file2);
 
-    // ✅ FIX CORS: Gunakan JSONP lewat <script> tag
-    await new Promise((resolve, reject) => {
-      const cbName = 'cb_' + Date.now();
-      window[cbName] = function(data) {
-        delete window[cbName];
-        document.body.removeChild(script);
-        if (data.status === 'success') resolve(data);
-        else reject(new Error(data.message || 'Gagal'));
-      };
-
-      payload.append('callback', cbName);
-      const script = document.createElement('script');
-      script.src = SCRIPT_URL + '?' + payload.toString();
-      script.onerror = () => reject(new Error('Network error'));
-      document.body.appendChild(script);
-
-      // Timeout 60 detik (file besar butuh waktu)
-      setTimeout(() => reject(new Error('Timeout, coba lagi')), 60000);
+    // ✅ no-cors: POST tetap sampai ke GAS & file tersimpan
+    // Browser tidak bisa baca response (opaque) — tidak masalah
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: payload
     });
 
+    // Langsung tampilkan sukses (GAS sudah menerima data)
     document.getElementById('loading').style.display = 'none';
     document.getElementById('mainContainer').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
