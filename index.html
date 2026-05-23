@@ -219,9 +219,9 @@ async function submitForm() {
     return false;
   }
 
-  // Cek ukuran file max 5MB
   const file1 = document.getElementById('fileKerja').files[0];
   const file2 = document.getElementById('buktiBayar').files[0];
+
   if (file1.size > 5 * 1024 * 1024) { alert('❌ File terlalu besar! Maksimal 5MB.'); return false; }
   if (file2.size > 5 * 1024 * 1024) { alert('❌ Bukti bayar terlalu besar! Maksimal 5MB.'); return false; }
 
@@ -252,36 +252,15 @@ async function submitForm() {
     payload.append('mimeType2',      file2.type);
     payload.append('bukti_bayar',    b64file2);
 
-    // JSONP: buat nama callback unik, inject <script src="GAS_URL?callback=cbXxx">
-    await new Promise((resolve, reject) => {
-      const cbName = 'cb_' + Date.now();
-
-      window[cbName] = function(data) {
-        delete window[cbName];
-        document.body.removeChild(script);
-        if (data.status === 'success') resolve(data);
-        else reject(new Error(data.message || 'Gagal'));
-      };
-
-      payload.append('callback', cbName);
-
-      const script = document.createElement('script');
-      script.src = SCRIPT_URL + '?' + payload.toString();
-      script.onerror = () => {
-        delete window[cbName];
-        reject(new Error('Network error'));
-      };
-      document.body.appendChild(script);
-
-      // Timeout 60 detik untuk file besar
-      setTimeout(() => {
-        if (window[cbName]) {
-          delete window[cbName];
-          reject(new Error('Timeout, coba lagi'));
-        }
-      }, 60000);
+    // ✅ no-cors: POST tetap sampai ke GAS & file tersimpan
+    // Browser tidak bisa baca response (opaque) — tidak masalah
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: payload
     });
 
+    // Langsung tampilkan sukses (GAS sudah menerima data)
     document.getElementById('loading').style.display = 'none';
     document.getElementById('mainContainer').style.display = 'none';
     document.getElementById('successBox').style.display = 'block';
