@@ -37,17 +37,21 @@
     .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; accent-color: #2563eb; }
     .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.2s; }
     .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
     .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
     .btn-outline { background: #fff; color: #2563eb; border: 2px solid #2563eb; }
-    .btn-wa { background: #25d366; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-outline:hover { background: #eff6ff; }
+    .btn-wa { background: #25d366; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; }
+    .btn-wa:hover { background: #1ebe5d; }
     .btn-row { display: flex; gap: 10px; }
     .btn-row .btn { flex: 1; }
     .error { color: #dc2626; font-size: 12px; margin-top: 4px; display: none; }
     .success-box { display: none; text-align: center; padding: 20px; }
     .success-box .icon { font-size: 60px; margin-bottom: 12px; }
-    .success-box h3 { color: #16a34a; margin-bottom: 8px; }
+    .success-box h3 { color: #16a34a; margin-bottom: 8px; font-size: 20px; }
+    .success-box p { font-size: 14px; color: #6b7280; margin-bottom: 16px; line-height: 1.6; }
     .loading { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
-    .loading-box { background: #fff; padding: 24px; border-radius: 14px; text-align: center; }
+    .loading-box { background: #fff; padding: 24px; border-radius: 14px; text-align: center; min-width: 180px; }
     .spinner { width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
@@ -55,7 +59,10 @@
 <body>
 
 <div class="loading" id="loading">
-  <div class="loading-box"><div class="spinner"></div><p>Mengirim pesanan...</p></div>
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p>Mengirim pesanan...<br><small style="color:#6b7280;font-size:12px;">Mohon tunggu, jangan tutup halaman</small></p>
+  </div>
 </div>
 
 <div class="container" id="mainContainer">
@@ -66,21 +73,28 @@
   </div>
 
   <div class="steps">
-    <div class="step-circle active" id="circle1">1</div><div class="step-line" id="line1"></div>
-    <div class="step-circle" id="circle2">2</div><div class="step-line" id="line2"></div>
+    <div class="step-circle active" id="circle1">1</div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-circle" id="circle2">2</div>
+    <div class="step-line" id="line2"></div>
     <div class="step-circle" id="circle3">3</div>
   </div>
 
   <form id="orderForm" onsubmit="return submitForm()">
+
+    <!-- STEP 1 -->
     <div class="form-step active" id="step1">
       <h3 style="margin-bottom:8px;">Langkah 1: Data & File</h3>
       <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Isi data dan upload file yang akan dicek plagiasi</p>
+
       <label>Nama Kamu *</label>
-      <input type="text" id="nama" placeholder="Nama lengkap" required>
+      <input type="text" id="nama" placeholder="Nama lengkap" autocomplete="name">
+
       <label>Nomor WhatsApp Kamu *</label>
-      <input type="tel" id="wa" placeholder="62812xxxxxxxx" required>
+      <input type="tel" id="wa" placeholder="62812xxxxxxxx" autocomplete="tel">
+
       <label>Jenis Layanan *</label>
-      <select id="jasa" required>
+      <select id="jasa">
         <option value="">-- Pilih --</option>
         <option>Cek Plagiasi Dokumen</option>
         <option>Cek Plagiasi Skripsi</option>
@@ -88,193 +102,260 @@
         <option>Cek Plagiasi Artikel</option>
         <option>Lainnya</option>
       </select>
+
       <label>Catatan (opsional)</label>
-      <textarea id="catatan" placeholder="Tambahan..."></textarea>
-      <label>Upload File (PDF/Word) *</label>
+      <textarea id="catatan" placeholder="Tambahan informasi..."></textarea>
+
+      <label>Upload File (PDF/Word) * <span style="font-weight:400;color:#6b7280;font-size:12px;">Maks. 5MB</span></label>
       <div class="upload-area" id="uploadBox1">
         <div class="icon">📄</div>
-        <div class="label-text">Klik pilih file</div>
+        <div class="label-text">Klik untuk pilih file</div>
         <div class="file-selected" id="fileName1"></div>
-        <input type="file" id="fileKerja" accept=".pdf,.doc,.docx,.zip,.rar" required>
+        <input type="file" id="fileKerja" accept=".pdf,.doc,.docx,.zip,.rar">
       </div>
       <div class="error" id="errFile1">⚠️ File wajib diupload!</div>
+
       <button type="button" class="btn btn-primary" onclick="goStep(2)">Lanjut ➡️</button>
     </div>
 
+    <!-- STEP 2 -->
     <div class="form-step" id="step2">
       <h3 style="margin-bottom:8px;">Langkah 2: Pembayaran QRIS</h3>
-      <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Scan QRIS & upload bukti</p>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Scan QRIS lalu upload bukti pembayaran</p>
+
       <div class="qris-box">
-        <img src="qris-anda.jpeg" alt="QRIS">
+        <img src="qris-anda.jpeg" alt="QRIS Pembayaran">
         <div class="amount">Rp 5.000</div>
-        <div class="info">Scan pakai GoPay/OVO/Dana/LinkAja/M-Banking<br><strong>Jasa Cek Plagiasi</strong></div>
+        <div class="info">Scan pakai GoPay / OVO / Dana / LinkAja / M-Banking<br><strong>Jasa Cek Plagiasi</strong></div>
       </div>
-      <label>Upload Bukti Pembayaran *</label>
+
+      <label>Upload Bukti Pembayaran * <span style="font-weight:400;color:#6b7280;font-size:12px;">Maks. 5MB</span></label>
       <div class="upload-area" id="uploadBox2">
         <div class="icon">📸</div>
-        <div class="label-text">Klik upload screenshot</div>
+        <div class="label-text">Klik upload screenshot bukti</div>
         <div class="file-selected" id="fileName2"></div>
-        <input type="file" id="buktiBayar" accept="image/*" required>
+        <input type="file" id="buktiBayar" accept="image/*">
       </div>
-      <div class="error" id="errFile2">⚠️ Bukti bayar wajib!</div>
+      <div class="error" id="errFile2">⚠️ Bukti pembayaran wajib diupload!</div>
+
       <div class="checkbox-row">
         <input type="checkbox" id="checkBayar">
-        <span>Saya sudah membayar sesuai nominal & upload bukti valid *</span>
+        <span style="font-size:13px;">Saya sudah membayar sesuai nominal & bukti valid *</span>
       </div>
-      <div class="error" id="errCheck">⚠️ Centang konfirmasi!</div>
+      <div class="error" id="errCheck">⚠️ Centang konfirmasi pembayaran!</div>
+
       <div class="btn-row">
         <button type="button" class="btn btn-outline" onclick="goStep(1)">⬅️ Kembali</button>
         <button type="button" class="btn btn-primary" onclick="goStep(3)">Lanjut ➡️</button>
       </div>
     </div>
 
+    <!-- STEP 3 -->
     <div class="form-step" id="step3">
-      <h3 style="margin-bottom:8px;">Langkah 3: Kirim</h3>
-      <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Periksa kembali dan kirim</p>
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;font-size:13px;">
-        ✅ File sudah diupload<br>✅ Pembayaran dilakukan<br>✅ Bukti bayar siap
+      <h3 style="margin-bottom:8px;">Langkah 3: Kirim Pesanan</h3>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Periksa kembali sebelum mengirim</p>
+
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;font-size:13px;line-height:1.8;">
+        ✅ File pekerjaan sudah diupload<br>
+        ✅ Pembayaran sudah dilakukan<br>
+        ✅ Bukti pembayaran sudah diupload
       </div>
-      <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px;margin-top:10px;font-size:12px;color:#92400e;">
-        ⚠️ Pastikan semua data benar. Hasil akan dikirim via WhatsApp dalam 1x24 jam.
+
+      <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:12px;margin-top:10px;font-size:12px;color:#92400e;line-height:1.6;">
+        ⚠️ Pastikan semua data sudah benar. Hasil cek plagiasi akan dikirim via WhatsApp dalam 1x24 jam.
       </div>
+
       <div class="checkbox-row">
         <input type="checkbox" id="checkFinal">
-        <span>Saya yakin data benar & setuju proses 1x24 jam *</span>
+        <span style="font-size:13px;">Saya yakin data sudah benar & setuju proses 1x24 jam *</span>
       </div>
-      <div class="error" id="errFinal">⚠️ Centang konfirmasi!</div>
+      <div class="error" id="errFinal">⚠️ Centang konfirmasi terlebih dahulu!</div>
+
       <button type="submit" class="btn btn-primary" id="btnSubmit" disabled>📤 Kirim Pesanan</button>
-      <button type="button" class="btn btn-wa" onclick="keWA()">💬 Konfirmasi WA</button>
-      <button type="button" class="btn btn-outline" onclick="goStep(2)">⬅️ Kembali</button>
+      <button type="button" class="btn btn-outline" onclick="goStep(2)" style="margin-top:8px;">⬅️ Kembali</button>
     </div>
+
   </form>
 
+  <!-- SUCCESS -->
   <div class="success-box" id="successBox">
     <div class="icon">✅</div>
     <h3>Pesanan Berhasil Dikirim!</h3>
-    <p>Terima kasih! File dan data sudah tersimpan. Hasil cek plagiasi akan dikirim via WhatsApp dalam 1x24 jam.</p>
-    <button class="btn btn-wa" onclick="keWA()" style="margin-top:12px;">💬 Chat Admin</button>
+    <p>Terima kasih! File dan data sudah tersimpan.<br>Hasil cek plagiasi akan dikirim via WhatsApp dalam 1x24 jam.</p>
+    <!-- Tombol diklik manual → tidak diblokir browser -->
+    <button class="btn btn-wa" onclick="keWA()">💬 Konfirmasi ke Admin via WA</button>
     <button class="btn btn-outline" onclick="location.reload()" style="margin-top:8px;">🔄 Pesan Lagi</button>
   </div>
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFz1cMf75p0sV-UbQB2a9L3iEwphsBcsPpEzO6YKOpnmXSjHtSox9CW6nkC-yYagwZXg/exec';
-const WA = '6281260776598';
+  // ============================================================
+  //  KONFIGURASI
+  // ============================================================
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSOtbMy-hrDzJ4vi404O41J62GpYawPlagV_fvF2hDkgUFTojLMaM4flQ-_Hk_3Mxw/exec';
+  const WA         = '6281260776598';
+  const MAX_SIZE   = 5 * 1024 * 1024; // 5MB
 
-document.getElementById('uploadBox1').onclick = () => document.getElementById('fileKerja').click();
-document.getElementById('uploadBox2').onclick = () => document.getElementById('buktiBayar').click();
+  // ============================================================
+  //  EVENT: klik area upload
+  // ============================================================
+  document.getElementById('uploadBox1').onclick = () => document.getElementById('fileKerja').click();
+  document.getElementById('uploadBox2').onclick = () => document.getElementById('buktiBayar').click();
 
-document.getElementById('fileKerja').onchange = function() {
-  document.getElementById('fileName1').textContent = this.files[0] ? '📎 ' + this.files[0].name : '';
-  document.getElementById('errFile1').style.display = 'none';
-};
-document.getElementById('buktiBayar').onchange = function() {
-  document.getElementById('fileName2').textContent = this.files[0] ? '📎 ' + this.files[0].name : '';
-  document.getElementById('errFile2').style.display = 'none';
-};
-document.getElementById('checkFinal').onchange = function() {
-  document.getElementById('btnSubmit').disabled = !this.checked;
-  document.getElementById('errFinal').style.display = this.checked ? 'none' : 'block';
-};
-
-function goStep(s) {
-  if (s === 2) {
-    if (!document.getElementById('nama').value) { alert('❌ Nama wajib diisi!'); return; }
-    if (!document.getElementById('wa').value || document.getElementById('wa').value.replace(/[^0-9]/g,'').length < 10) { alert('❌ Nomor WA tidak valid!'); return; }
-    if (!document.getElementById('jasa').value) { alert('❌ Pilih layanan!'); return; }
-    if (!document.getElementById('fileKerja').files[0]) { document.getElementById('errFile1').style.display = 'block'; return; }
+  document.getElementById('fileKerja').onchange = function () {
+    const f = this.files[0];
+    document.getElementById('fileName1').textContent = f ? '📎 ' + f.name : '';
     document.getElementById('errFile1').style.display = 'none';
-  }
-  if (s === 3) {
-    if (!document.getElementById('buktiBayar').files[0]) { document.getElementById('errFile2').style.display = 'block'; return; }
-    if (!document.getElementById('checkBayar').checked) { document.getElementById('errCheck').style.display = 'block'; return; }
+  };
+
+  document.getElementById('buktiBayar').onchange = function () {
+    const f = this.files[0];
+    document.getElementById('fileName2').textContent = f ? '📎 ' + f.name : '';
     document.getElementById('errFile2').style.display = 'none';
-    document.getElementById('errCheck').style.display = 'none';
-  }
-  document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
-  document.getElementById('step' + s).classList.add('active');
-  for (let i = 1; i <= 3; i++) {
-    const c = document.getElementById('circle' + i);
-    c.classList.remove('active', 'done');
-    if (i < s) c.classList.add('done');
-    if (i === s) c.classList.add('active');
-  }
-  document.getElementById('line1').classList.toggle('done', s > 1);
-  document.getElementById('line2').classList.toggle('done', s > 2);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+  };
 
-function keWA() {
-  const nama = document.getElementById('nama').value || 'Customer';
-  const jasa = document.getElementById('jasa').value || 'Cek Plagiasi';
-  window.open(`https://wa.me/${WA}?text=${encodeURIComponent('Halo kak, saya *' + nama + '* sudah kirim pesanan *' + jasa + '*. Mohon dicek ya 🙏')}`, '_blank');
-}
+  document.getElementById('checkFinal').onchange = function () {
+    document.getElementById('btnSubmit').disabled = !this.checked;
+    if (this.checked) document.getElementById('errFinal').style.display = 'none';
+  };
 
-// ✅ FIX BUG 2: Gunakan JSONP lewat <script> tag, bukan fetch()
-// Ini bypass CORS karena <script> tidak kena restriction CORS browser
-async function submitForm() {
-  event.preventDefault();
-  if (!document.getElementById('checkFinal').checked) {
-    document.getElementById('errFinal').style.display = 'block';
+  // ============================================================
+  //  NAVIGASI STEP
+  // ============================================================
+  function goStep(s) {
+    // Validasi step 1 → 2
+    if (s === 2) {
+      if (!document.getElementById('nama').value.trim()) {
+        alert('❌ Nama wajib diisi!'); return;
+      }
+      const waVal = document.getElementById('wa').value.replace(/[^0-9]/g, '');
+      if (waVal.length < 10) {
+        alert('❌ Nomor WhatsApp tidak valid!'); return;
+      }
+      if (!document.getElementById('jasa').value) {
+        alert('❌ Pilih jenis layanan!'); return;
+      }
+      if (!document.getElementById('fileKerja').files[0]) {
+        document.getElementById('errFile1').style.display = 'block'; return;
+      }
+      if (document.getElementById('fileKerja').files[0].size > MAX_SIZE) {
+        alert('❌ File terlalu besar! Maksimal 5MB.'); return;
+      }
+    }
+
+    // Validasi step 2 → 3
+    if (s === 3) {
+      if (!document.getElementById('buktiBayar').files[0]) {
+        document.getElementById('errFile2').style.display = 'block'; return;
+      }
+      if (document.getElementById('buktiBayar').files[0].size > MAX_SIZE) {
+        alert('❌ Bukti pembayaran terlalu besar! Maksimal 5MB.'); return;
+      }
+      if (!document.getElementById('checkBayar').checked) {
+        document.getElementById('errCheck').style.display = 'block'; return;
+      }
+      document.getElementById('errFile2').style.display = 'none';
+      document.getElementById('errCheck').style.display  = 'none';
+    }
+
+    // Tampilkan step
+    document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+    document.getElementById('step' + s).classList.add('active');
+
+    // Update lingkaran
+    for (let i = 1; i <= 3; i++) {
+      const c = document.getElementById('circle' + i);
+      c.classList.remove('active', 'done');
+      if (i < s) c.classList.add('done');
+      if (i === s) c.classList.add('active');
+    }
+    document.getElementById('line1').classList.toggle('done', s > 1);
+    document.getElementById('line2').classList.toggle('done', s > 2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ============================================================
+  //  BUKA WHATSAPP — dipanggil manual (klik tombol)
+  //  sehingga tidak diblokir browser
+  // ============================================================
+  function keWA() {
+    const nama = document.getElementById('nama').value || 'Customer';
+    const jasa = document.getElementById('jasa').value || 'Cek Plagiasi';
+    const pesan = 'Halo kak, saya *' + nama + '* sudah kirim pesanan *' + jasa + '*. Mohon dicek ya 🙏';
+    window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(pesan), '_blank');
+  }
+
+  // ============================================================
+  //  SUBMIT FORM
+  // ============================================================
+  async function submitForm() {
+    event.preventDefault();
+
+    if (!document.getElementById('checkFinal').checked) {
+      document.getElementById('errFinal').style.display = 'block';
+      return false;
+    }
+
+    const file1 = document.getElementById('fileKerja').files[0];
+    const file2 = document.getElementById('buktiBayar').files[0];
+
+    // Tampilkan loading
+    document.getElementById('loading').style.display = 'flex';
+    document.getElementById('btnSubmit').disabled    = true;
+    document.getElementById('btnSubmit').textContent = 'Mengirim...';
+
+    try {
+      // Konversi file ke base64
+      const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload  = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+      });
+
+      const b64file1 = await toBase64(file1);
+      const b64file2 = await toBase64(file2);
+
+      // Susun payload
+      const payload = new URLSearchParams();
+      payload.append('nama',           document.getElementById('nama').value.trim());
+      payload.append('wa',             document.getElementById('wa').value.trim());
+      payload.append('jasa',           document.getElementById('jasa').value);
+      payload.append('catatan',        document.getElementById('catatan').value.trim());
+      payload.append('fileName',       file1.name);
+      payload.append('mimeType',       file1.type || 'application/octet-stream');
+      payload.append('file_pekerjaan', b64file1);
+      payload.append('fileName2',      file2.name);
+      payload.append('mimeType2',      file2.type || 'image/jpeg');
+      payload.append('bukti_bayar',    b64file2);
+
+      // Kirim ke Google Apps Script
+      // mode: 'no-cors' → POST tetap diterima GAS, file tersimpan di Drive & Sheet
+      // Browser tidak bisa baca response (opaque) — tidak masalah
+      await fetch(SCRIPT_URL, {
+        method : 'POST',
+        mode   : 'no-cors',
+        body   : payload
+      });
+
+      // Tampilkan halaman sukses
+      document.getElementById('loading').style.display      = 'none';
+      document.getElementById('mainContainer').style.display = 'none';
+      document.getElementById('successBox').style.display    = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // TIDAK ada setTimeout(keWA) di sini
+      // Browser blokir window.open() dari setTimeout — user klik sendiri tombolnya
+
+    } catch (err) {
+      document.getElementById('loading').style.display  = 'none';
+      document.getElementById('btnSubmit').disabled    = false;
+      document.getElementById('btnSubmit').textContent = '📤 Kirim Pesanan';
+      alert('❌ Gagal mengirim: ' + err.message + '\n\nCoba lagi atau hubungi admin via WA.');
+    }
+
     return false;
   }
-
-  const file1 = document.getElementById('fileKerja').files[0];
-  const file2 = document.getElementById('buktiBayar').files[0];
-
-  if (file1.size > 5 * 1024 * 1024) { alert('❌ File terlalu besar! Maksimal 5MB.'); return false; }
-  if (file2.size > 5 * 1024 * 1024) { alert('❌ Bukti bayar terlalu besar! Maksimal 5MB.'); return false; }
-
-  document.getElementById('loading').style.display = 'flex';
-  document.getElementById('btnSubmit').disabled = true;
-  document.getElementById('btnSubmit').textContent = 'Mengirim...';
-
-  try {
-    const toBase64 = file => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
-    });
-
-    const b64file1 = await toBase64(file1);
-    const b64file2 = await toBase64(file2);
-
-    const payload = new URLSearchParams();
-    payload.append('nama',           document.getElementById('nama').value);
-    payload.append('wa',             document.getElementById('wa').value);
-    payload.append('jasa',           document.getElementById('jasa').value);
-    payload.append('catatan',        document.getElementById('catatan').value);
-    payload.append('fileName',       file1.name);
-    payload.append('mimeType',       file1.type);
-    payload.append('file_pekerjaan', b64file1);
-    payload.append('fileName2',      file2.name);
-    payload.append('mimeType2',      file2.type);
-    payload.append('bukti_bayar',    b64file2);
-
-    // ✅ no-cors: POST tetap sampai ke GAS & file tersimpan
-    // Browser tidak bisa baca response (opaque) — tidak masalah
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: payload
-    });
-
-    // Langsung tampilkan sukses (GAS sudah menerima data)
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('mainContainer').style.display = 'none';
-    document.getElementById('successBox').style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(keWA, 2000);
-
-  } catch(err) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('btnSubmit').disabled = false;
-    document.getElementById('btnSubmit').textContent = '📤 Kirim Pesanan';
-    alert('❌ Error: ' + err.message);
-  }
-  return false;
-}
 </script>
 </body>
 </html>
