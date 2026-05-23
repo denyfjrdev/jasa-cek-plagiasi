@@ -1,274 +1,34 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jasa Cek Plagiasi - Deny</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f5f5; padding: 20px; color: #333; }
-    .container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-    .header { text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #eee; }
-    .header h2 { color: #2563eb; font-size: 22px; }
-    .wa-seller { display: inline-block; background: #25d366; color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; text-decoration: none; margin-top: 8px; }
-    .steps { display: flex; justify-content: center; align-items: center; gap: 0; margin-bottom: 24px; }
-    .step-circle { width: 32px; height: 32px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #9ca3af; transition: 0.3s; }
-    .step-circle.active { background: #2563eb; color: #fff; }
-    .step-circle.done { background: #16a34a; color: #fff; }
-    .step-line { width: 50px; height: 3px; background: #e5e7eb; transition: 0.3s; }
-    .step-line.done { background: #16a34a; }
-    .form-step { display: none; }
-    .form-step.active { display: block; }
-    label { display: block; font-weight: 600; margin-top: 14px; margin-bottom: 6px; font-size: 14px; }
-    input, select, textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; font-family: inherit; transition: 0.2s; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #2563eb; }
-    textarea { resize: vertical; min-height: 80px; }
-    .upload-area { border: 2px dashed #d1d5db; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: 0.2s; background: #fafafa; }
-    .upload-area:hover { border-color: #2563eb; background: #eff6ff; }
-    .upload-area .icon { font-size: 36px; margin-bottom: 6px; }
-    .upload-area .label-text { font-size: 14px; color: #6b7280; }
-    .upload-area .file-selected { font-size: 13px; color: #2563eb; margin-top: 6px; font-weight: 500; }
-    .upload-area input { display: none; }
-    .qris-box { background: #f0f4ff; border: 2px solid #2563eb; border-radius: 14px; padding: 20px; text-align: center; margin: 12px 0; }
-    .qris-box img { max-width: 180px; border-radius: 8px; background: #fff; padding: 8px; }
-    .qris-box .amount { font-size: 20px; font-weight: bold; color: #2563eb; margin: 8px 0; }
-    .qris-box .info { font-size: 12px; color: #6b7280; }
-    .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin: 12px 0; padding: 12px; background: #f9fafb; border-radius: 10px; }
-    .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; accent-color: #2563eb; }
-    .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.2s; }
-    .btn-primary { background: #2563eb; color: #fff; }
-    .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
-    .btn-outline { background: #fff; color: #2563eb; border: 2px solid #2563eb; }
-    .btn-wa { background: #25d366; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-row { display: flex; gap: 10px; }
-    .btn-row .btn { flex: 1; }
-    .error { color: #dc2626; font-size: 12px; margin-top: 4px; display: none; }
-    .success-box { display: none; text-align: center; padding: 20px; }
-    .success-box .icon { font-size: 60px; margin-bottom: 12px; }
-    .success-box h3 { color: #16a34a; margin-bottom: 8px; }
-    .loading { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
-    .loading-box { background: #fff; padding: 24px; border-radius: 14px; text-align: center; }
-    .spinner { width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
-</head>
-<body>
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({ status: 'ok' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
-  <div class="loading" id="loading">
-    <div class="loading-box"><div class="spinner"></div><p>Mengirim pesanan...</p></div>
-  </div>
+function doPost(e) {
+  try {
+    var nama = e.parameter.nama;
+    var wa = e.parameter.wa;
+    var jasa = e.parameter.jasa;
+    var catatan = e.parameter.catatan;
 
-  <div class="container" id="mainContainer">
-    <div class="header">
-      <h2>📌 Jasa Cek Plagiasi</h2>
-      <p style="font-size:14px;color:#6b7280;">Milik Deny</p>
-      <a href="https://wa.me/6281260776598" target="_blank" class="wa-seller">💬 Admin: +6281260776598</a>
-    </div>
+    var root = DriveApp.getRootFolder();
+    var mainFolder;
+    var folders = root.getFoldersByName('Pesanan_Cek_Plagiasi');
+    if (folders.hasNext()) {
+      mainFolder = folders.next();
+    } else {
+      mainFolder = root.createFolder('Pesanan_Cek_Plagiasi');
+    }
 
-    <div class="steps">
-      <div class="step-circle active" id="circle1">1</div><div class="step-line" id="line1"></div>
-      <div class="step-circle" id="circle2">2</div><div class="step-line" id="line2"></div>
-      <div class="step-circle" id="circle3">3</div>
-    </div>
+    var timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    var subFolder = mainFolder.createFolder(timestamp + '_' + nama.replace(/[^a-zA-Z0-9]/g, '_'));
 
-    <form id="orderForm" action="https://formspree.io/f/xredlkav" method="POST" enctype="multipart/form-data">
-      <div class="form-step active" id="step1">
-        <h3 style="margin-bottom:8px;">Langkah 1: Data & File</h3>
-        <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Isi data dan upload file yang akan dicek plagiasi</p>
-        <label>Nama Kamu *</label>
-        <input type="text" id="namaCust" name="nama" placeholder="Nama lengkap" required>
-        <label>Nomor WhatsApp Kamu *</label>
-        <input type="tel" id="waCust" name="wa" placeholder="62812xxxxxxxx" required>
-        <label>Jenis Layanan *</label>
-        <select id="jasa" name="jasa" required>
-          <option value="">-- Pilih --</option>
-          <option value="Cek Plagiasi Dokumen">Cek Plagiasi Dokumen</option>
-          <option value="Cek Plagiasi Skripsi">Cek Plagiasi Skripsi</option>
-          <option value="Cek Plagiasi Jurnal">Cek Plagiasi Jurnal</option>
-          <option value="Cek Plagiasi Artikel">Cek Plagiasi Artikel</option>
-          <option value="Lainnya">Lainnya</option>
-        </select>
-        <label>Catatan (opsional)</label>
-        <textarea id="catatan" name="catatan" placeholder="Tambahan..."></textarea>
-        <label>Upload File (PDF/Word) *</label>
-        <div class="upload-area" id="uploadBox1">
-          <div class="icon">📄</div>
-          <div class="label-text">Klik pilih file</div>
-          <div class="file-selected" id="fileName1"></div>
-          <input type="file" id="fileKerja" name="file_pekerjaan" accept=".pdf,.doc,.docx,.zip,.rar">
-        </div>
-        <div class="error" id="errFile1">⚠️ File wajib diupload!</div>
-        <button type="button" class="btn btn-primary" onclick="goStep(2)">Lanjut ➡️</button>
-      </div>
+    var info = 'Nama: ' + nama + '\nWA: ' + wa + '\nJasa: ' + jasa + '\nCatatan: ' + (catatan || '-') + '\nWaktu: ' + new Date().toLocaleString('id-ID');
+    subFolder.createFile('info_pesanan.txt', info);
 
-      <div class="form-step" id="step2">
-        <h3 style="margin-bottom:8px;">Langkah 2: Pembayaran QRIS</h3>
-        <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Scan QRIS & upload bukti</p>
-        <div class="qris-box">
-          <img src="qris-anda.jpeg" alt="QRIS">
-          <div class="amount">Rp 5.000</div>
-          <div class="info">Scan pakai GoPay/OVO/Dana/LinkAja/M-Banking<br><strong>Jasa Cek Plagiasi - Deny</strong></div>
-        </div>
-        <label>Upload Bukti Pembayaran *</label>
-        <div class="upload-area" id="uploadBox2">
-          <div class="icon">📸</div>
-          <div class="label-text">Klik upload screenshot</div>
-          <div class="file-selected" id="fileName2"></div>
-          <input type="file" id="buktiBayar" name="bukti_bayar" accept="image/*">
-        </div>
-        <div class="error" id="errFile2">⚠️ Bukti bayar wajib!</div>
-        <div class="checkbox-row">
-          <input type="checkbox" id="checkBayar">
-          <span>Saya sudah membayar sesuai nominal & upload bukti valid *</span>
-        </div>
-        <div class="error" id="errCheck">⚠️ Centang konfirmasi!</div>
-        <div class="btn-row">
-          <button type="button" class="btn btn-outline" onclick="goStep(1)">⬅️ Kembali</button>
-          <button type="button" class="btn btn-primary" onclick="goStep(3)">Lanjut ➡️</button>
-        </div>
-      </div>
-
-      <div class="form-step" id="step3">
-        <h3 style="margin-bottom:8px;">Langkah 3: Kirim</h3>
-        <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Periksa kembali dan kirim</p>
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;font-size:13px;">
-          ✅ File sudah diupload<br>✅ Pembayaran dilakukan<br>✅ Bukti bayar siap
-        </div>
-        <div class="checkbox-row">
-          <input type="checkbox" id="checkFinal">
-          <span>Saya yakin data benar & setuju proses 1x24 jam *</span>
-        </div>
-        <div class="error" id="errFinal">⚠️ Centang konfirmasi!</div>
-        <button type="submit" class="btn btn-primary" id="btnSubmit" disabled>📤 Kirim Pesanan</button>
-        <button type="button" class="btn btn-wa" onclick="keWA()">💬 Konfirmasi WA</button>
-        <button type="button" class="btn btn-outline" onclick="goStep(2)">⬅️ Kembali</button>
-      </div>
-    </form>
-
-    <div class="success-box" id="successBox">
-      <div class="icon">✅</div>
-      <h3>Pesanan Berhasil Dikirim!</h3>
-      <p>File & data tersimpan. Deny akan kirim hasil cek plagiasi via WhatsApp dalam 1x24 jam.</p>
-      <button class="btn btn-wa" onclick="keWA()">💬 Chat Admin</button>
-      <button class="btn btn-outline" onclick="resetAll()">🔄 Pesan Lagi</button>
-    </div>
-  </div>
-
-  <script>
-    (function() {
-      const WA_ADMIN = '6281260776598';
-      const form = document.getElementById('orderForm');
-      const btnSubmit = document.getElementById('btnSubmit');
-      const checkFinal = document.getElementById('checkFinal');
-      const errFinal = document.getElementById('errFinal');
-      const loading = document.getElementById('loading');
-      const successBox = document.getElementById('successBox');
-      const mainContainer = document.getElementById('mainContainer');
-
-      document.getElementById('uploadBox1').addEventListener('click', () => document.getElementById('fileKerja').click());
-      document.getElementById('uploadBox2').addEventListener('click', () => document.getElementById('buktiBayar').click());
-
-      document.getElementById('fileKerja').addEventListener('change', function() {
-        const f = this.files[0];
-        document.getElementById('fileName1').textContent = f ? '📎 ' + f.name : '';
-        document.getElementById('errFile1').style.display = 'none';
-      });
-      document.getElementById('buktiBayar').addEventListener('change', function() {
-        const f = this.files[0];
-        document.getElementById('fileName2').textContent = f ? '📎 ' + f.name : '';
-        document.getElementById('errFile2').style.display = 'none';
-      });
-
-      checkFinal.addEventListener('change', () => {
-        btnSubmit.disabled = !checkFinal.checked;
-        errFinal.style.display = checkFinal.checked ? 'none' : 'block';
-      });
-
-      function validStep1() {
-        const nama = document.getElementById('namaCust').value.trim();
-        const wa = document.getElementById('waCust').value.trim();
-        const jasa = document.getElementById('jasa').value;
-        const file = document.getElementById('fileKerja').files[0];
-        if (!nama) { alert('❌ Nama wajib diisi!'); return false; }
-        if (!wa || wa.replace(/[^0-9]/g,'').length < 10) { alert('❌ Nomor WA tidak valid!'); return false; }
-        if (!jasa) { alert('❌ Pilih layanan!'); return false; }
-        if (!file) { document.getElementById('errFile1').style.display = 'block'; return false; }
-        document.getElementById('errFile1').style.display = 'none';
-        return true;
-      }
-
-      function validStep2() {
-        const bukti = document.getElementById('buktiBayar').files[0];
-        const check = document.getElementById('checkBayar').checked;
-        if (!bukti) { document.getElementById('errFile2').style.display = 'block'; return false; }
-        if (!check) { document.getElementById('errCheck').style.display = 'block'; return false; }
-        document.getElementById('errFile2').style.display = 'none';
-        document.getElementById('errCheck').style.display = 'none';
-        return true;
-      }
-
-      window.goStep = function(step) {
-        if (step === 2 && !validStep1()) return;
-        if (step === 3 && !validStep2()) return;
-        document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
-        document.getElementById('step' + step).classList.add('active');
-        updateCircles(step);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        if (step === 3) {
-          btnSubmit.disabled = !checkFinal.checked;
-          errFinal.style.display = checkFinal.checked ? 'none' : 'block';
-        }
-      };
-
-      function updateCircles(active) {
-        for (let i = 1; i <= 3; i++) {
-          const c = document.getElementById('circle' + i);
-          c.classList.remove('active', 'done');
-          if (i < active) c.classList.add('done');
-          if (i === active) c.classList.add('active');
-        }
-        document.getElementById('line1').classList.toggle('done', active > 1);
-        document.getElementById('line2').classList.toggle('done', active > 2);
-      }
-
-      window.keWA = function() {
-        const nama = document.getElementById('namaCust').value.trim() || 'Customer';
-        const jasa = document.getElementById('jasa').value || 'Cek Plagiasi';
-        const msg = `Halo kak Deny, saya *${nama}* sudah kirim pesanan *${jasa}* dan sudah transfer via QRIS. Mohon dicek ya. Terima kasih 🙏`;
-        window.open(`https://wa.me/${WA_ADMIN}?text=${encodeURIComponent(msg)}`, '_blank');
-      };
-
-      window.resetAll = function() {
-        form.reset();
-        document.getElementById('fileName1').textContent = '';
-        document.getElementById('fileName2').textContent = '';
-        btnSubmit.disabled = true;
-        document.querySelectorAll('.error').forEach(e => e.style.display = 'none');
-        successBox.style.display = 'none';
-        mainContainer.style.display = 'block';
-        goStep(1);
-      };
-
-      form.addEventListener('submit', () => {
-        if (!checkFinal.checked) {
-          errFinal.style.display = 'block';
-          e.preventDefault();
-          return;
-        }
-        loading.style.display = 'flex';
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Mengirim...';
-        setTimeout(() => {
-          loading.style.display = 'none';
-          mainContainer.style.display = 'none';
-          successBox.style.display = 'block';
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          setTimeout(keWA, 2000);
-        }, 3000);
-      });
-
-      goStep(1);
-    })();
-  </script>
-</body>
-</html>
+    return HtmlService.createHtmlOutput(
+      '<script>window.top.location.href="https://denyfjrdev.github.io/jasa-cek-plagiasi/?success=true";</script>'
+    );
+  } catch(error) {
+    return HtmlService.createHtmlOutput('<h3>Error: ' + error.toString() + '</h3>');
+  }
+}
