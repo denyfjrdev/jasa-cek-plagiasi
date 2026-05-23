@@ -50,7 +50,6 @@
             margin-top: 8px;
         }
 
-        /* Step Indicator */
         .steps {
             display: flex;
             justify-content: center;
@@ -94,7 +93,6 @@
             background: #16a34a;
         }
 
-        /* Form Step */
         .form-step {
             display: none;
         }
@@ -137,7 +135,6 @@
             min-height: 80px;
         }
 
-        /* Upload Box */
         .upload-area {
             border: 2px dashed #d1d5db;
             border-radius: 12px;
@@ -174,7 +171,6 @@
             display: none;
         }
 
-        /* QRIS Box */
         .qris-box {
             background: #f0f4ff;
             border: 2px solid #2563eb;
@@ -203,7 +199,6 @@
             color: #6b7280;
         }
 
-        /* Checkbox */
         .checkbox-row {
             display: flex;
             align-items: flex-start;
@@ -225,7 +220,6 @@
             font-size: 13px;
         }
 
-        /* Buttons */
         .btn {
             width: 100%;
             padding: 14px;
@@ -272,7 +266,6 @@
             flex: 1;
         }
 
-        /* Error */
         .error {
             color: #dc2626;
             font-size: 12px;
@@ -280,7 +273,6 @@
             display: none;
         }
 
-        /* Success */
         .success-box {
             display: none;
             text-align: center;
@@ -297,7 +289,6 @@
             margin-bottom: 8px;
         }
 
-        /* Loading */
         .loading {
             display: none;
             position: fixed;
@@ -337,7 +328,6 @@
 </head>
 <body>
 
-    <!-- Loading Overlay -->
     <div class="loading" id="loading">
         <div class="loading-box">
             <div class="spinner"></div>
@@ -345,9 +335,7 @@
         </div>
     </div>
 
-    <!-- Main Container -->
     <div class="container" id="mainContainer">
-        <!-- Header -->
         <div class="header">
             <h2>📌 Jasa Cek Plagiasi</h2>
             <p style="font-size:14px;color:#6b7280;">Milik Deny</p>
@@ -356,7 +344,6 @@
             </a>
         </div>
 
-        <!-- Step Indicator -->
         <div class="steps">
             <div class="step-circle active" id="circle1">1</div>
             <div class="step-line" id="line1"></div>
@@ -365,21 +352,20 @@
             <div class="step-circle" id="circle3">3</div>
         </div>
 
-        <!-- Form -->
-        <form id="formOrder">
-            <!-- STEP 1 -->
+        <form id="orderForm">
+
             <div class="form-step active" id="step1">
                 <h3 style="margin-bottom:8px;">Langkah 1: Data & File</h3>
                 <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Isi data diri dan upload file yang ingin dicek plagiasi</p>
 
-                <label>Nama Kamu *</label>
-                <input type="text" id="namaCust" placeholder="Nama lengkap" required>
+                <label for="namaCust">Nama Kamu *</label>
+                <input type="text" id="namaCust" name="namaCust" placeholder="Nama lengkap" required>
 
-                <label>Nomor WhatsApp Kamu *</label>
-                <input type="tel" id="waCust" placeholder="62812xxxxxxxx" required>
+                <label for="waCust">Nomor WhatsApp Kamu *</label>
+                <input type="tel" id="waCust" name="waCust" placeholder="62812xxxxxxxx" required>
 
-                <label>Jenis Layanan *</label>
-                <select id="jasa" required>
+                <label for="jasa">Jenis Layanan *</label>
+                <select id="jasa" name="jasa" required>
                     <option value="">-- Pilih Layanan --</option>
                     <option value="Cek Plagiasi Dokumen">Cek Plagiasi Dokumen</option>
                     <option value="Cek Plagiasi Skripsi">Cek Plagiasi Skripsi</option>
@@ -388,22 +374,21 @@
                     <option value="Lainnya">Lainnya</option>
                 </select>
 
-                <label>Catatan (opsional)</label>
-                <textarea id="catatan" placeholder="Tulis catatan tambahan jika ada..."></textarea>
+                <label for="catatan">Catatan (opsional)</label>
+                <textarea id="catatan" name="catatan" placeholder="Tulis catatan tambahan jika ada..."></textarea>
 
                 <label>Upload File yang Ingin Dicek (PDF/Word) *</label>
                 <div class="upload-area" id="uploadBox1">
                     <div class="icon">📄</div>
                     <div class="label-text">Klik untuk pilih file (PDF/DOC/DOCX)</div>
                     <div class="file-selected" id="fileName1"></div>
-                    <input type="file" id="fileKerja" accept=".pdf,.doc,.docx,.zip,.rar">
+                    <input type="file" id="fileKerja" name="fileKerja" accept=".pdf,.doc,.docx,.zip,.rar">
                 </div>
                 <div class="error" id="errFile1">⚠️ File wajib diupload!</div>
 
                 <button type="button" class="btn btn-primary" onclick="goStep(2)">Lanjut ke Pembayaran ➡️</button>
             </div>
 
-            <!-- STEP 2 -->
             <div class="form-step" id="step2">
                 <h3 style="margin-bottom:8px;">Langkah 2: Pembayaran QRIS</h3>
                 <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Scan QRIS dan upload bukti pembayaran</p>
@@ -422,12 +407,12 @@
                     <div class="icon">📸</div>
                     <div class="label-text">Klik untuk upload screenshot bukti bayar</div>
                     <div class="file-selected" id="fileName2"></div>
-                    <input type="file" id="buktiBayar" accept="image/*">
+                    <input type="file" id="buktiBayar" name="buktiBayar" accept="image/*">
                 </div>
                 <div class="error" id="errFile2">⚠️ Bukti bayar wajib diupload!</div>
 
                 <div class="checkbox-row">
-                    <input type="checkbox" id="checkBayar">
+                    <input type="checkbox" id="checkBayar" name="checkBayar">
                     <span>Saya sudah membayar sesuai nominal di atas dan mengunggah bukti pembayaran yang valid *</span>
                 </div>
                 <div class="error" id="errCheck">⚠️ Centang konfirmasi pembayaran!</div>
@@ -438,7 +423,6 @@
                 </div>
             </div>
 
-            <!-- STEP 3 -->
             <div class="form-step" id="step3">
                 <h3 style="margin-bottom:8px;">Langkah 3: Kirim Pesanan</h3>
                 <p style="font-size:13px;color:#6b7280;margin-bottom:8px;">Periksa kembali semua data sebelum kirim</p>
@@ -454,21 +438,18 @@
                 </div>
 
                 <div class="checkbox-row">
-                    <input type="checkbox" id="checkFinal">
+                    <input type="checkbox" id="checkFinal" name="checkFinal">
                     <span>Saya yakin semua data yang diisi sudah benar dan lengkap. Saya setuju untuk menunggu proses 1x24 jam *</span>
                 </div>
                 <div class="error" id="errFinal">⚠️ Centang konfirmasi data!</div>
 
-                <button type="submit" class="btn btn-primary" id="btnSubmit" disabled>📤 Kirim Pesanan</button>
-
+                <button type="button" class="btn btn-primary" id="btnSubmit" disabled>📤 Kirim Pesanan</button>
                 <button type="button" class="btn btn-wa" onclick="keWA()">💬 Konfirmasi via WhatsApp</button>
-
                 <button type="button" class="btn btn-outline" onclick="goStep(2)">⬅️ Kembali</button>
             </div>
         </form>
 
-        <!-- Success Box -->
-        <div class="success-box" id="successBox">
+        <div class="success-box" id="successBox" style="display:none;">
             <div class="icon">✅</div>
             <h3>Pesanan Berhasil Dikirim!</h3>
             <p>File dan data kamu sudah tersimpan. Deny akan segera memproses cek plagiasi dan mengirim hasilnya via WhatsApp dalam 1x24 jam.</p>
@@ -486,7 +467,6 @@
 
         let currentStep = 1;
 
-        // Klik upload box untuk trigger input file
         document.getElementById('uploadBox1').onclick = function() {
             document.getElementById('fileKerja').click();
         };
@@ -494,7 +474,6 @@
             document.getElementById('buktiBayar').click();
         };
 
-        // Tampilkan nama file yang dipilih
         document.getElementById('fileKerja').onchange = function() {
             const f = this.files[0];
             document.getElementById('fileName1').textContent = f ? '📎 ' + f.name : '';
@@ -506,13 +485,11 @@
             document.getElementById('errFile2').style.display = 'none';
         };
 
-        // Enable tombol submit saat checkbox final dicentang
         document.getElementById('checkFinal').onchange = function() {
             document.getElementById('btnSubmit').disabled = !this.checked;
             document.getElementById('errFinal').style.display = this.checked ? 'none' : 'block';
         };
 
-        // Pindah step
         function goStep(step) {
             if (step === 2 && !validStep1()) return;
             if (step === 3 && !validStep2()) return;
@@ -524,7 +501,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Validasi step 1
         function validStep1() {
             const nama = document.getElementById('namaCust').value.trim();
             const wa = document.getElementById('waCust').value.trim();
@@ -539,7 +515,6 @@
             return true;
         }
 
-        // Validasi step 2
         function validStep2() {
             const bukti = document.getElementById('buktiBayar').files[0];
             const check = document.getElementById('checkBayar').checked;
@@ -551,7 +526,6 @@
             return true;
         }
 
-        // Update step indicator
         function updateCircles(active) {
             for (let i = 1; i <= 3; i++) {
                 const c = document.getElementById('circle' + i);
@@ -563,7 +537,6 @@
             document.getElementById('line2').classList.toggle('done', active > 2);
         }
 
-        // Kirim WhatsApp ke admin
         function keWA() {
             const nama = document.getElementById('namaCust').value.trim() || 'Customer';
             const jasa = document.getElementById('jasa').value || 'Cek Plagiasi';
@@ -571,9 +544,8 @@
             window.open(`https://wa.me/${WA_ADMIN}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        // Reset form
         function resetAll() {
-            document.getElementById('formOrder').reset();
+            document.getElementById('orderForm').reset();
             document.getElementById('fileName1').textContent = '';
             document.getElementById('fileName2').textContent = '';
             document.getElementById('btnSubmit').disabled = true;
@@ -583,8 +555,7 @@
             goStep(1);
         }
 
-        // SUBMIT FORM
-        document.getElementById('formOrder').onsubmit = async function(e) {
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             if (!document.getElementById('checkFinal').checked) {
@@ -628,7 +599,6 @@
                     document.getElementById('mainContainer').style.display = 'none';
                     document.getElementById('successBox').style.display = 'block';
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                    // Otomatis buka WhatsApp setelah 2 detik
                     setTimeout(keWA, 2000);
                 } else {
                     alert('❌ Gagal mengirim: ' + (hasil.message || 'Coba lagi nanti'));
@@ -640,9 +610,8 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('btnSubmit').disabled = false;
             }
-        };
+        });
 
-        // Convert file ke base64
         function toBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
