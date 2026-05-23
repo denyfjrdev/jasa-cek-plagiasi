@@ -260,65 +260,76 @@
 
   // ── Submit form ──
   async function submitForm() {
-    event.preventDefault();
+  event.preventDefault();
+  if (!document.getElementById('checkFinal').checked) {
+    document.getElementById('errFinal').style.display = 'block';
+    return false;
+  }
 
-    if (!document.getElementById('checkFinal').checked) {
-      document.getElementById('errFinal').style.display = 'block';
-      return false;
-    }
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('btnSubmit').disabled = true;
+  document.getElementById('btnSubmit').textContent = 'Mengirim...';
 
+  try {
     const file1 = document.getElementById('fileKerja').files[0];
     const file2 = document.getElementById('buktiBayar').files[0];
 
-    document.getElementById('loading').style.display = 'flex';
-    document.getElementById('btnSubmit').disabled    = true;
-    document.getElementById('btnSubmit').textContent = 'Mengirim...';
+    const toBase64 = file => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+    });
 
-    try {
-      const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload  = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-      });
+    const b64file1 = await toBase64(file1);
+    const b64file2 = await toBase64(file2);
 
-      const b64file1 = await toBase64(file1);
-      const b64file2 = await toBase64(file2);
+    const payload = new URLSearchParams();
+    payload.append('nama',           document.getElementById('nama').value);
+    payload.append('wa',             document.getElementById('wa').value);
+    payload.append('jasa',           document.getElementById('jasa').value);
+    payload.append('catatan',        document.getElementById('catatan').value);
+    payload.append('fileName',       file1.name);
+    payload.append('mimeType',       file1.type);
+    payload.append('file_pekerjaan', b64file1);
+    payload.append('fileName2',      file2.name);
+    payload.append('mimeType2',      file2.type);
+    payload.append('bukti_bayar',    b64file2);
 
-      const payload = new URLSearchParams();
-      payload.append('nama',           document.getElementById('nama').value.trim());
-      payload.append('wa',             document.getElementById('wa').value.trim());
-      payload.append('jasa',           document.getElementById('jasa').value);
-      payload.append('catatan',        document.getElementById('catatan').value.trim());
-      payload.append('fileName',       file1.name);
-      payload.append('mimeType',       file1.type || 'application/octet-stream');
-      payload.append('file_pekerjaan', b64file1);
-      payload.append('fileName2',      file2.name);
-      payload.append('mimeType2',      file2.type || 'image/jpeg');
-      payload.append('bukti_bayar',    b64file2);
+    // ✅ FIX CORS: Gunakan JSONP lewat <script> tag
+    await new Promise((resolve, reject) => {
+      const cbName = 'cb_' + Date.now();
+      window[cbName] = function(data) {
+        delete window[cbName];
+        document.body.removeChild(script);
+        if (data.status === 'success') resolve(data);
+        else reject(new Error(data.message || 'Gagal'));
+      };
 
-      // no-cors: POST tetap diterima GAS, response sengaja tidak dibaca
-      await fetch(SCRIPT_URL, {
-        method : 'POST',
-        mode   : 'no-cors',
-        body   : payload
-      });
+      payload.append('callback', cbName);
+      const script = document.createElement('script');
+      script.src = SCRIPT_URL + '?' + payload.toString();
+      script.onerror = () => reject(new Error('Network error'));
+      document.body.appendChild(script);
 
-      // Sembunyikan form, tampilkan success
-      document.getElementById('loading').style.display      = 'none';
-      document.getElementById('mainContainer').style.display = 'none';
-      document.getElementById('successBox').style.display    = 'block'; // ✅ tampil karena di luar mainContainer
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Timeout 60 detik (file besar butuh waktu)
+      setTimeout(() => reject(new Error('Timeout, coba lagi')), 60000);
+    });
 
-    } catch (err) {
-      document.getElementById('loading').style.display  = 'none';
-      document.getElementById('btnSubmit').disabled    = false;
-      document.getElementById('btnSubmit').textContent = '📤 Kirim Pesanan';
-      alert('❌ Gagal mengirim: ' + err.message + '\n\nCoba lagi atau hubungi admin via WA.');
-    }
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('mainContainer').style.display = 'none';
+    document.getElementById('successBox').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(keWA, 2000);
 
-    return false;
+  } catch(err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('btnSubmit').disabled = false;
+    document.getElementById('btnSubmit').textContent = '📤 Kirim Pesanan';
+    alert('❌ Error: ' + err.message);
   }
+  return false;
+}
 </script>
 </body>
 </html>
