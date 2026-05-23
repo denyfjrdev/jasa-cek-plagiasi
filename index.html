@@ -158,7 +158,7 @@
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwSOtbMy-hrDzJ4vi404O41J62GpYawPlagV_fvF2hDkgUFTojLMaM4flQ-_Hk_3Mxw/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFz1cMf75p0sV-UbQB2a9L3iEwphsBcsPpEzO6YKOpnmXSjHtSox9CW6nkC-yYagwZXg/exec';
 const WA = '6281260776598';
 
 document.getElementById('uploadBox1').onclick = () => document.getElementById('fileKerja').click();
@@ -210,6 +210,8 @@ function keWA() {
   window.open(`https://wa.me/${WA}?text=${encodeURIComponent('Halo kak, saya *' + nama + '* sudah kirim pesanan *' + jasa + '*. Mohon dicek ya 🙏')}`, '_blank');
 }
 
+// ✅ FIX BUG 2: Gunakan JSONP lewat <script> tag, bukan fetch()
+// Ini bypass CORS karena <script> tidak kena restriction CORS browser
 async function submitForm() {
   event.preventDefault();
   if (!document.getElementById('checkFinal').checked) {
@@ -217,14 +219,17 @@ async function submitForm() {
     return false;
   }
 
+  // Cek ukuran file max 5MB
+  const file1 = document.getElementById('fileKerja').files[0];
+  const file2 = document.getElementById('buktiBayar').files[0];
+  if (file1.size > 5 * 1024 * 1024) { alert('❌ File terlalu besar! Maksimal 5MB.'); return false; }
+  if (file2.size > 5 * 1024 * 1024) { alert('❌ Bukti bayar terlalu besar! Maksimal 5MB.'); return false; }
+
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('btnSubmit').disabled = true;
   document.getElementById('btnSubmit').textContent = 'Mengirim...';
 
   try {
-    const file1 = document.getElementById('fileKerja').files[0];
-    const file2 = document.getElementById('buktiBayar').files[0];
-
     const toBase64 = file => new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -232,34 +237,57 @@ async function submitForm() {
       reader.onerror = reject;
     });
 
-    const payload = new URLSearchParams();
-    payload.append('nama', document.getElementById('nama').value);
-    payload.append('wa', document.getElementById('wa').value);
-    payload.append('jasa', document.getElementById('jasa').value);
-    payload.append('catatan', document.getElementById('catatan').value);
-    payload.append('fileName', file1.name);
-    payload.append('mimeType', file1.type);
-    payload.append('file_pekerjaan', await toBase64(file1));
-    payload.append('fileName2', file2.name);
-    payload.append('mimeType2', file2.type);
-    payload.append('bukti_bayar', await toBase64(file2));
+    const b64file1 = await toBase64(file1);
+    const b64file2 = await toBase64(file2);
 
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: payload
+    const payload = new URLSearchParams();
+    payload.append('nama',           document.getElementById('nama').value);
+    payload.append('wa',             document.getElementById('wa').value);
+    payload.append('jasa',           document.getElementById('jasa').value);
+    payload.append('catatan',        document.getElementById('catatan').value);
+    payload.append('fileName',       file1.name);
+    payload.append('mimeType',       file1.type);
+    payload.append('file_pekerjaan', b64file1);
+    payload.append('fileName2',      file2.name);
+    payload.append('mimeType2',      file2.type);
+    payload.append('bukti_bayar',    b64file2);
+
+    // JSONP: buat nama callback unik, inject <script src="GAS_URL?callback=cbXxx">
+    await new Promise((resolve, reject) => {
+      const cbName = 'cb_' + Date.now();
+
+      window[cbName] = function(data) {
+        delete window[cbName];
+        document.body.removeChild(script);
+        if (data.status === 'success') resolve(data);
+        else reject(new Error(data.message || 'Gagal'));
+      };
+
+      payload.append('callback', cbName);
+
+      const script = document.createElement('script');
+      script.src = SCRIPT_URL + '?' + payload.toString();
+      script.onerror = () => {
+        delete window[cbName];
+        reject(new Error('Network error'));
+      };
+      document.body.appendChild(script);
+
+      // Timeout 60 detik untuk file besar
+      setTimeout(() => {
+        if (window[cbName]) {
+          delete window[cbName];
+          reject(new Error('Timeout, coba lagi'));
+        }
+      }, 60000);
     });
 
-    const result = await res.json();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('mainContainer').style.display = 'none';
+    document.getElementById('successBox').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(keWA, 2000);
 
-    if (result.status === 'success') {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('mainContainer').style.display = 'none';
-      document.getElementById('successBox').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setTimeout(keWA, 2000);
-    } else {
-      throw new Error(result.message || 'Gagal');
-    }
   } catch(err) {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('btnSubmit').disabled = false;
